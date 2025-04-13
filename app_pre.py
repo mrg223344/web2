@@ -99,7 +99,7 @@ def load_model():
 
     # 加载预训练权重
     try:
-        model.load_state_dict(torch.load('e:\\website\\web2\\model.pth', map_location=torch.device('cpu')))
+        model.load_state_dict(torch.load('model.pth', map_location=torch.device('cpu')))
         model.eval()
         return model
     except:
@@ -112,7 +112,7 @@ def load_model():
 def load_scaler():
     try:
         import joblib
-        return joblib.load('e:\\website\\web2\\scaler2.joblib')
+        return joblib.load('scaler2.joblib')
     except:
         st.warning("标准化器加载失败，将使用默认标准化")
         return None
