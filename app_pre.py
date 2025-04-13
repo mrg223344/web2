@@ -10,8 +10,8 @@ import warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
 
 # 设置页面标题
-st.set_page_config(page_title="乳腺癌预测模型", layout="wide")
-st.title("乳腺癌预测模型")
+st.set_page_config(page_title="乳腺癌骨转移预测模型", layout="wide")
+st.title("乳腺癌骨转移预测模型")
 
 
 # 定义MultiHeadSelfAttention类
@@ -213,7 +213,7 @@ predict_button = st.sidebar.button("预测")
 
 # 主要内容区域
 st.write("### 模型说明")
-st.write("本模型基于AutoInt深度学习架构，用于预测乳腺癌患者的预后情况。")
+st.write("本模型基于表格深度学习架构，用于预测乳腺癌患者的骨转移。")
 st.write("请在左侧输入患者的相关信息，然后点击'预测'按钮获取结果。")
 
 # 加载模型
