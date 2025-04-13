@@ -10,8 +10,8 @@ import warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
 
 # 设置页面标题
-st.set_page_config(page_title="乳腺癌骨转移预测模型", layout="wide")
-st.title("乳腺癌骨转移预测模型")
+st.set_page_config(page_title="乳腺癌预测模型", layout="wide")
+st.title("乳腺癌预测模型")
 
 
 # 定义MultiHeadSelfAttention类
@@ -86,7 +86,7 @@ class AutoInt(nn.Module):
 @st.cache_resource
 def load_model():
     # 定义类别维度 - 根据您的数据
-    categories = [3, 4, 4, 2, 3, 4, 2, 2, 4, 4, 4, 6, 6, 2, 2, 2, 2]
+    categories = [3, 4, 4, 2, 3, 4, 2, 4, 4, 4, 6, 6, 2, 2, 2, 2, 4]
 
     # 初始化模型
     model = AutoInt(
@@ -99,7 +99,7 @@ def load_model():
 
     # 加载预训练权重
     try:
-        model.load_state_dict(torch.load('model.pth', map_location=torch.device('cpu')))
+        model.load_state_dict(torch.load('e:\\website\\web2\\model.pth', map_location=torch.device('cpu')))
         model.eval()
         return model
     except:
@@ -112,7 +112,7 @@ def load_model():
 def load_scaler():
     try:
         import joblib
-        return joblib.load('scaler.joblib')
+        return joblib.load('e:\\website\\web2\\scaler2.joblib')
     except:
         st.warning("标准化器加载失败，将使用默认标准化")
         return None
@@ -123,115 +123,97 @@ st.sidebar.header("输入患者信息")
 
 # 连续变量
 st.sidebar.subheader("连续变量")
-age = st.sidebar.slider("年龄", min_value=19, max_value=79, value=50,
-                        help="取值范围：19-79（连续型变量）")
+age = st.sidebar.slider("年龄", min_value=19, max_value=79, value=50, help="范围: 19-79岁")
 tumor_size = st.sidebar.slider("肿瘤大小（毫米，以最大直径测量）", min_value=1, max_value=150, value=20,
-                               help="取值范围：1-150（连续型变量）")
+                               help="范围: 1-150")
 time_to_response = st.sidebar.slider("确诊到治疗响应时间（天）", min_value=0, max_value=731, value=30,
-                                     help="取值范围：0-731（连续型变量）")
+                                     help="范围: 0-731天")
 
 # 分类变量
 st.sidebar.subheader("分类变量")
 race = st.sidebar.selectbox("种族",
                             options=[1, 2, 3],
                             format_func=lambda x:
-                            {1: "白种人", 2: "黑种人", 3: "亚裔、太平洋岛屿原住民、美洲印第安人/阿拉斯加原住民"}[x],
-                            help="取值范围：1-3（SEER数据库编码）")
+                            {1: "白种人", 2: "黑种人", 3: "亚裔、太平洋岛屿原住民、美洲印第安人/阿拉斯加原住民"}[x])
 
 marital_status = st.sidebar.selectbox("婚姻状况",
                                       options=[1, 2, 3, 4],
                                       format_func=lambda x:
-                                      {1: "已婚/有稳定伴侣", 2: "离婚/分居", 3: "丧偶", 4: "从未结婚"}[x],
-                                      help="取值范围：1-4（SEER数据库编码）")
+                                      {1: "已婚/有稳定伴侣", 2: "离婚/分居", 3: "丧偶", 4: "从未结婚"}[x])
 
 family_income = st.sidebar.selectbox("家庭中位收入（美元）",
                                      options=[1, 2, 3, 4],
                                      format_func=lambda x:
-                                     {1: "0-60000", 2: "60000-80000", 3: "80000-100000", 4: "100000以上"}[x],
-                                     help="取值范围：1-4（SEER数据库编码）")
+                                     {1: "0-60000", 2: "60000-80000", 3: "80000-100000", 4: "100000以上"}[x])
 
 laterality = st.sidebar.selectbox("侧别性",
                                   options=[1, 2],
-                                  format_func=lambda x: {1: "左侧", 2: "右侧"}[x],
-                                  help="取值范围：1-2（SEER数据库编码）")
+                                  format_func=lambda x: {1: "左侧", 2: "右侧"}[x])
 
 histology = st.sidebar.selectbox("组织学类型",
                                  options=[1, 2, 3],
                                  format_func=lambda x:
-                                 {1: "导管癌 (8500-8508)", 2: "小叶癌 (8520-8524)", 3: "其他特殊类型"}[x],
-                                 help="取值范围：1-3（SEER数据库编码）")
+                                 {1: "导管癌 (8500-8508)", 2: "小叶癌 (8520-8524)", 3: "其他特殊类型"}[x])
 
 grade = st.sidebar.selectbox("组织学分级",
                              options=[1, 2, 3, 4],
                              format_func=lambda x:
-                             {1: "高分化；I级", 2: "中分化；II级", 3: "低分化；III级", 4: "未分化；IV级"}[x],
-                             help="取值范围：1-4（SEER数据库编码）")
+                             {1: "高分化；I级", 2: "中分化；II级", 3: "低分化；III级", 4: "未分化；IV级"}[x])
 
 pr_status = st.sidebar.selectbox("PR状态",
                                  options=[0, 1],
-                                 format_func=lambda x: {0: "阴性", 1: "阳性"}[x],
-                                 help="取值范围：0-1（SEER数据库编码）")
+                                 format_func=lambda x: {0: "阴性", 1: "阳性"}[x])
 
 breast_subtype = st.sidebar.selectbox("乳腺亚型",
                                       options=[1, 2, 3, 4],
                                       format_func=lambda x:
-                                      {1: "HR-/HER2-", 2: "HR-/HER2+", 3: "HR+/HER2-", 4: "HR+/HER2+"}[x],
-                                      help="取值范围：1-4（SEER数据库编码）")
+                                      {1: "HR-/HER2-", 2: "HR-/HER2+", 3: "HR+/HER2-", 4: "HR+/HER2+"}[x])
 
 t_stage = st.sidebar.selectbox("T分期",
                                options=[1, 2, 3, 4],
-                               format_func=lambda x: {1: "T1期", 2: "T2期", 3: "T3期", 4: "T4期"}[x],
-                               help="取值范围：1-4（SEER数据库编码）")
+                               format_func=lambda x: {1: "T1期", 2: "T2期", 3: "T3期", 4: "T4期"}[x])
 
 n_stage = st.sidebar.selectbox("N分期",
                                options=[1, 2, 3, 4],
-                               format_func=lambda x: {1: "N0期", 2: "N1期", 3: "N2期", 4: "N3期"}[x],
-                               help="取值范围：1-4（SEER数据库编码）")
+                               format_func=lambda x: {1: "N0期", 2: "N1期", 3: "N2期", 4: "N3期"}[x])
 
 lymph_nodes_examined = st.sidebar.selectbox("局部淋巴结检出数",
                                             options=[0, 1, 2, 3, 4, 5],
-                                            format_func=lambda x: "5及以上" if x == 5 else str(x),
-                                            help="取值范围：0-5（SEER数据库编码）")
+                                            format_func=lambda x: "5及以上" if x == 5 else str(x))
 
 lymph_nodes_positive = st.sidebar.selectbox("局部淋巴结阳性数",
                                             options=[0, 1, 2, 3, 4, 5],
-                                            format_func=lambda x: "5及以上" if x == 5 else str(x),
-                                            help="取值范围：0-5（SEER数据库编码）")
+                                            format_func=lambda x: "5及以上" if x == 5 else str(x))
 
 liver_metastasis = st.sidebar.selectbox("肝转移",
                                         options=[0, 1],
-                                        format_func=lambda x: {0: "否", 1: "是"}[x],
-                                        help="取值范围：0-1（SEER数据库编码）")
+                                        format_func=lambda x: {0: "否", 1: "是"}[x])
 
 lung_metastasis = st.sidebar.selectbox("肺转移",
                                        options=[0, 1],
-                                       format_func=lambda x: {0: "否", 1: "是"}[x],
-                                       help="取值范围：0-1（SEER数据库编码）")
+                                       format_func=lambda x: {0: "否", 1: "是"}[x])
 
 radiation = st.sidebar.selectbox("放疗",
                                  options=[0, 1],
-                                 format_func=lambda x: {0: "否", 1: "是"}[x],
-                                 help="取值范围：0-1（SEER数据库编码）")
+                                 format_func=lambda x: {0: "否", 1: "是"}[x])
 
 chemotherapy = st.sidebar.selectbox("化疗",
                                     options=[0, 1],
-                                    format_func=lambda x: {0: "否", 1: "是"}[x],
-                                    help="取值范围：0-1（SEER数据库编码）")
+                                    format_func=lambda x: {0: "否", 1: "是"}[x])
 
 surgery = st.sidebar.selectbox("原发部位手术",
                                options=[1, 2, 3, 4],
                                format_func=lambda x: {1: "未进行手术（00）",
                                                       2: "局部切除/破坏性手术（20-30）",
                                                       3: "乳房切除术（40-59）",
-                                                      4: "其他或未明确手术(60-80)"}[x],
-                               help="取值范围：1-4（SEER数据库编码）")
+                                                      4: "其他或未明确手术(60-80)"}[x])
 
 # 预测按钮
 predict_button = st.sidebar.button("预测")
 
 # 主要内容区域
 st.write("### 模型说明")
-st.write("本模型基于表格深度学习架构，用于预测乳腺癌患者的骨转移。")
+st.write("本模型基于AutoInt深度学习架构，用于预测乳腺癌患者的预后情况。")
 st.write("请在左侧输入患者的相关信息，然后点击'预测'按钮获取结果。")
 
 # 加载模型
@@ -309,22 +291,6 @@ if predict_button:
                 st.write("模型预测该患者为阴性，但请结合临床情况综合判断。")
 
             st.write("注意：本模型仅作为辅助工具，不能替代专业医生的诊断。")
-
-            # 显示特征信息
-            st.write("### 输入特征")
-            feature_df = pd.DataFrame({
-                "特征名称": ["年龄", "肿瘤大小", "确诊到治疗响应时间", "种族", "婚姻状况", "家庭收入", "侧别性",
-                             "组织学类型", "组织学分级", "PR状态", "乳腺亚型", "T分期", "N分期", "局部淋巴结检出数",
-                             "局部淋巴结阳性数", "肝转移", "肺转移", "放疗", "化疗", "原发部位手术"],
-                "取值": [age, tumor_size, time_to_response, race, marital_status, family_income, laterality, histology,
-                         grade, pr_status, breast_subtype, t_stage, n_stage, lymph_nodes_examined, lymph_nodes_positive,
-                         liver_metastasis, lung_metastasis, radiation, chemotherapy, surgery],
-                "含义": ["年龄（岁）", "肿瘤大小（毫米）", "确诊到治疗响应时间（天）", "种族分类", "婚姻状况分类",
-                         "家庭收入分类", "侧别性分类", "组织学类型分类", "组织学分级分类", "PR状态分类", "乳腺亚型分类",
-                         "T分期分类", "N分期分类", "局部淋巴结检出数分类", "局部淋巴结阳性数分类", "肝转移分类",
-                         "肺转移分类", "放疗分类", "化疗分类", "原发部位手术分类"]
-            })
-            st.dataframe(feature_df)
 
         except Exception as e:
             st.error(f"预测过程中出现错误: {e}")
